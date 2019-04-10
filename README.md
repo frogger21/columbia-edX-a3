@@ -9,7 +9,7 @@ mean and an arbitrarily high covariance matrix.
 
 The dataset is the iris dataset at UCI Machine Learning repository.
 
-In unsupervised learning we do not have labeled data. We try and group the data and find the structure.
+In unsupervised learning we do not have labeled data. We try and group the data and find the hidden structure.
 
 ![alt text](https://github.com/frogger21/columbia-edX-a3/blob/master/edx4.JPG)
 

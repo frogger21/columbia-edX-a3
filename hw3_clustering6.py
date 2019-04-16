@@ -166,8 +166,10 @@ def statsinfo(X,n):
     return(stdev,mean,maxx,miny)
     
 #~~ START EMGMM ~~    
-def EMGMM(data,clusters,iterations):
+def EMGMM(data,clusters,iterations,terminatingDifferential):
     #declare some variables
+    terminatingDifferentialBoolean = False
+    previousL = 0
     nX = data.shape[0]
     nD = data.shape[1]
     k = clusters
@@ -177,16 +179,23 @@ def EMGMM(data,clusters,iterations):
     phi = np.zeros((nX,k)) #intialize with 0 n*k matrix
     first = 0
     columbiaX = 0
-    printon = 1
-    print("Initial SIGMA START")
-    for z in range(k):
-        print(sigma[z])
-    print("Initial mu")    
-    print(mu)
-    print("The initial pi")
-    print(pi)
+    printon = 0
+    printon2 = 1
+    if printon == 1:
+        print("Initial SIGMA START")
+        for z in range(k):
+            print(sigma[z])
+        print("Initial mu")    
+        print(mu)
+        print("The initial pi")
+        print(pi)
+    #calculate first L
+    for ii in range(nX):
+        for K in range(k):
+            previousL += pi[K]*MVgaussian(data[ii],mu[K],sigma[K],nD)
     for i in range(iterations):
-        print ("New ITERATION!: " + str(i+1))
+        if printon == 1:
+            print ("New ITERATION!: " + str(i+1))
         #
         # check for sigma to be not singular
         #
@@ -207,7 +216,7 @@ def EMGMM(data,clusters,iterations):
                 temp1 = MVgaussian(theX,mu[K],sigmaTemp,nD)
                 temp2 = temp1*pi[K]
                 phiDenominator += temp2
-                if printon == 0 and K == (k-1) and first == 0 and phiDenominator == 0:
+                if printon == 1 and K == (k-1) and first == 0 and phiDenominator == 0:
                     #it's a sad sad day that we made it in here
                     temp ="really sad =("
             if phiDenominator == 0 and first == 0:
@@ -222,7 +231,7 @@ def EMGMM(data,clusters,iterations):
                 for K in range(k):
                     sigmaTemp = sigma[K]+np.diag([1e-6]*nD)
                     phi[n,K] = (pi[K] * MVgaussian(theX,mu[K],sigmaTemp,nD))/phiDenominator
-        if i >= 0 and printon == 0:
+        if i >= 0 and printon == 1:
             temp = "phi iteration:" + str(i+1)
             print(temp)
             print(phi)
@@ -236,7 +245,7 @@ def EMGMM(data,clusters,iterations):
         for K in range(k):
             for n in range(nX):
                 nk[K] += phi[n,K]
-        if printon == 0:
+        if printon == 1:
             print("NK at iteration: " + str(i+1))
             print(nk)
         #update pi[k]
@@ -269,8 +278,8 @@ def EMGMM(data,clusters,iterations):
             for z in range(k):
                 print("k = " + str(z+1))
                 print(sigma[z])
-        print("MU at iteration: " + str(i+1))
-        print(mu)
+            print("MU at iteration: " + str(i+1))
+            print(mu)
         if columbiaX == 1:
             #output for columbiaX edX output checking
             filename = "pi-" + str(i+1) + ".csv" 
@@ -281,7 +290,28 @@ def EMGMM(data,clusters,iterations):
             for j in range(k): #k is the number of clusters 
                 filename = "Sigma-" + str(j+1) + "-" + str(i+1) + ".csv" #this must be done 5 times (or the number of clusters) for each iteration
                 np.savetxt(filename, sigma[j], delimiter=",")
-        
+        if printon2 == 1:
+            L = 0 #the likelihood we are trying to maximize
+            for ii in range(nX):
+                for K in range(k):
+                    theX = data[ii]
+                    mew = mu[K]
+                    sigmaTemp = sigma[K]+np.diag([1e-6]*nD) #ensure no singularity
+                    L += pi[K]*MVgaussian(theX,mew,sigmaTemp,nD)
+            statement = "Likelihood at iteration [" + str(i+1) + "] = " + str(L)
+            print(statement)
+            Diff = L - previousL
+            if(Diff < terminatingDifferential):
+                terminatingDifferentialBoolean = True
+            if(i == (iterations-1) or terminatingDifferentialBoolean == True):
+                print("Final Mu (each row is for one cluster) k = " + str(k))
+                print(mu)
+                print("Final Covariance Matrices")
+                print(sigma)
+                if terminatingDifferentialBoolean == True:
+                    print("We have converged!")
+                    break
+            previousL = L
     #end for i
     
 #~~ END EMGMM ~~
@@ -291,4 +321,4 @@ temp2 = "iris.csv"
 Z = np.genfromtxt(temp2, delimiter=',')    
     
 KMeans(Z,3,10)
-EMGMM(Z,3,10)
+EMGMM(Z,3,100,0.01)

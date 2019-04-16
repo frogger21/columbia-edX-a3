@@ -167,6 +167,7 @@ def statsinfo(X,n):
     
 #~~ START EMGMM ~~    
 def EMGMM(data,clusters,iterations,terminatingDifferential):
+    
     #declare some variables
     terminatingDifferentialBoolean = False
     previousL = 0
@@ -181,6 +182,7 @@ def EMGMM(data,clusters,iterations,terminatingDifferential):
     columbiaX = 0
     printon = 0
     printon2 = 1
+    
     if printon == 1:
         print("Initial SIGMA START")
         for z in range(k):
@@ -189,10 +191,12 @@ def EMGMM(data,clusters,iterations,terminatingDifferential):
         print(mu)
         print("The initial pi")
         print(pi)
+    
     #calculate first L
     for ii in range(nX):
         for K in range(k):
             previousL += pi[K]*MVgaussian(data[ii],mu[K],sigma[K],nD)
+    
     for i in range(iterations):
         if printon == 1:
             print ("New ITERATION!: " + str(i+1))
@@ -204,6 +208,7 @@ def EMGMM(data,clusters,iterations,terminatingDifferential):
             if sigmacheck(sigma[K],nD) == 0:
                 print("IN HERE")
                 sigma[K] += np.diag([1e-6]*nD) #add small number to diagonal
+        
         #~~~~~~~~~~~~~~#
         #~~ "E" step ~~#
         #~~~~~~~~~~~~~~#
@@ -263,7 +268,6 @@ def EMGMM(data,clusters,iterations,terminatingDifferential):
             mu[K] = temp 
             
         #update sigma[k]
-    
         for K in range(k):
             temp2 = np.zeros((nD,nD)) #dxd matrix full of zeros
             for n in range(nX):
@@ -280,6 +284,7 @@ def EMGMM(data,clusters,iterations,terminatingDifferential):
                 print(sigma[z])
             print("MU at iteration: " + str(i+1))
             print(mu)
+        
         if columbiaX == 1:
             #output for columbiaX edX output checking
             filename = "pi-" + str(i+1) + ".csv" 
@@ -290,6 +295,7 @@ def EMGMM(data,clusters,iterations,terminatingDifferential):
             for j in range(k): #k is the number of clusters 
                 filename = "Sigma-" + str(j+1) + "-" + str(i+1) + ".csv" #this must be done 5 times (or the number of clusters) for each iteration
                 np.savetxt(filename, sigma[j], delimiter=",")
+        
         if printon2 == 1:
             L = 0 #the likelihood we are trying to maximize
             for ii in range(nX):

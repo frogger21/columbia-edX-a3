@@ -15,7 +15,7 @@ In unsupervised learning we do not have labeled data. We try and group the data 
 
 Source: Pattern Recognition and Machine Learning 2006
 
-The EM GMM algorithm will initialize the k clusters to k random points in the data set. It will maximize the likelihood objective function and iterate until the incremental improvement to the likelihood is small enough or the number of iterations specified has been completed.
+The EM GMM algorithm will initialize the k clusters to k random points in the data set. It will maximize the likelihood objective function and iterate until the incremental improvement to the likelihood is small enough or that the number of iterations specified has been completed.
 
 ![alt text](https://github.com/frogger21/columbia-edX-a3/blob/master/EM1.JPG)
 
